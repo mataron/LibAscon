@@ -168,12 +168,12 @@ target_include_directories(testascon PUBLIC inc/)
 add_custom_command(
         TARGET testascon POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/tst/vectors
-        ${CMAKE_BINARY_DIR}/vectors)
+        ${CMAKE_CURRENT_SOURCE_DIR}/tst/vectors
+        ${CMAKE_CURRENT_BINARY_DIR}/vectors)
 # Delete the test vectors file on make-clean
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
-        "${CMAKE_BINARY_DIR}/vectors")
+        "${CMAKE_CURRENT_BINARY_DIR}/vectors")
 
 #if (NOT MSVC) # TODO: find out why this has link errors...
 # Benchmark runner executable, reuse the static library instead of recompiling
