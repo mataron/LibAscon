@@ -6,6 +6,10 @@
  * @authors Matjaž Guštin <dev@matjaz.it>
  */
 
+#ifdef _MSVC
+#include <malloc.h>
+#endif
+
 #include "atto.h"
 #include "test.h"
 #include "ascon.h"
@@ -225,7 +229,11 @@ static void test_decrypt_1_byte_pt_empty_ad(void)
             };
     atto_eq(testcase.plaintext_len,
             testcase.ciphertext_len);
+#ifdef _MSVC
+    uint8_t* obtained_plaintext = _malloca(testcase.plaintext_len * 2);
+#else
     uint8_t obtained_plaintext[testcase.plaintext_len * 2];
+#endif
     ascon_aead_ctx_t aead_ctx;
     size_t new_pt_len = 0;
     bool is_valid;
@@ -263,6 +271,9 @@ static void test_decrypt_1_byte_pt_empty_ad(void)
     atto_eq(new_pt_len, 1);
     atto_eq(is_valid, ASCON_TAG_OK);
     atto_memeq(obtained_plaintext, testcase.plaintext, testcase.plaintext_len);
+#ifdef _MSVC
+    _freea(obtained_plaintext);
+#endif
 }
 
 static void test_decrypt_1_byte_pt_1_byte_ad(void)
@@ -290,7 +301,11 @@ static void test_decrypt_1_byte_pt_1_byte_ad(void)
                     },
             };
     atto_eq(testcase.plaintext_len, testcase.ciphertext_len);
+#ifdef _MSVC
+    uint8_t* obtained_plaintext = _malloca(testcase.plaintext_len * 2);
+#else
     uint8_t obtained_plaintext[testcase.plaintext_len * 2];
+#endif
     ascon_aead_ctx_t aead_ctx;
     size_t new_pt_len = 0;
     bool is_valid;
@@ -311,6 +326,9 @@ static void test_decrypt_1_byte_pt_1_byte_ad(void)
     atto_eq(new_pt_len, 1);
     atto_eq(is_valid, ASCON_TAG_OK);
     atto_memeq(obtained_plaintext, testcase.plaintext, testcase.plaintext_len);
+#ifdef _MSVC
+    _freea(obtained_plaintext);
+#endif
 }
 
 static void test_decrypt_offline(void)

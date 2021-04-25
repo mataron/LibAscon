@@ -6,6 +6,10 @@
  * @authors Matjaž Guštin <dev@matjaz.it>
  */
 
+#ifdef _MSVC
+#include <malloc.h>
+#endif
+
 #include "atto.h"
 #include "test.h"
 #include "ascon.h"
@@ -247,7 +251,11 @@ static void test_encrypt_1_byte_pt_empty_ad(void)
             };
     atto_eq(testcase.plaintext_len,
             testcase.ciphertext_len);
+#ifdef _MSVC
+    uint8_t* obtained_ciphertext = _malloca(testcase.ciphertext_len * 2);
+#else
     uint8_t obtained_ciphertext[testcase.ciphertext_len * 2];
+#endif
     uint8_t obtained_tag[ASCON_AEAD_TAG_MIN_SECURE_LEN];
 
     ascon_aead_ctx_t aead_ctx;
@@ -291,6 +299,9 @@ static void test_encrypt_1_byte_pt_empty_ad(void)
                testcase.ciphertext,
                testcase.ciphertext_len);
     atto_memeq(obtained_tag, testcase.tag, ASCON_AEAD_TAG_MIN_SECURE_LEN);
+#ifdef _MSVC
+    _freea(obtained_ciphertext);
+#endif
 }
 
 static void test_encrypt_1_byte_pt_1_byte_ad(void)
@@ -317,7 +328,11 @@ static void test_encrypt_1_byte_pt_1_byte_ad(void)
                     },
             };
     atto_eq(testcase.plaintext_len, testcase.ciphertext_len);
+#ifdef _MSVC
+    uint8_t* obtained_ciphertext = _malloca(testcase.ciphertext_len * 2);
+#else
     uint8_t obtained_ciphertext[testcase.ciphertext_len * 2];
+#endif
     uint8_t obtained_tag[ASCON_AEAD_TAG_MIN_SECURE_LEN];
 
     ascon_aead_ctx_t aead_ctx;
@@ -341,6 +356,9 @@ static void test_encrypt_1_byte_pt_1_byte_ad(void)
     atto_memeq(obtained_ciphertext,
                testcase.ciphertext,
                testcase.ciphertext_len);
+#ifdef _MSVC
+    _freea(obtained_ciphertext);
+#endif
 }
 
 static void test_encrypt_offline(void)

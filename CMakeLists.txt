@@ -25,15 +25,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+if (MSVC)
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS_RELEASE} -D_MSVC")
+endif ()
+
 # Activate a million warnings to have the cleanest possible code
 set(FLAGS_WARNINGS -Wall -Wextra -pedantic -Wconversion -Wdouble-promotion
         -Wswitch-default -Wswitch-enum -Wuninitialized -Wno-unused-variable
         -Wpacked -Wpadded -Wshadow -Wformat-security -Wlogical-not-parentheses
         -Waggregate-return -Wmissing-declarations -Wsign-conversion
         -Wjump-misses-init)
+if (NOT MSVC)
 # Debug build: compile with no optimisation, debug info and printing
 set(CMAKE_C_FLAGS_DEBUG "${WARNING_FLAGS} -g -O0 -DDEBUG \
     -fprofile-instr-generate -fcoverage-mapping")
+endif ()
 # Append sanitiser flags on non-Windows systems
 if (NOT WIN32 AND NOT CYGWIN AND NOT MSYS)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} \
@@ -41,6 +47,17 @@ if (NOT WIN32 AND NOT CYGWIN AND NOT MSYS)
             -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer")
 endif ()
 
+if (MSVC)
+# Mini-sized release build: compile with optimisation for size
+# convert warnings into errors and some other optimisations
+set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -DMINSIZEREL \
+        ${WARNING_FLAGS}")
+
+# Performance-oriented release build: compile with optimisation for speed
+# convert warnings into errors and some other optimisations
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DRELEASE \
+        ${WARNING_FLAGS}")
+else ()
 # Mini-sized release build: compile with optimisation for size
 # convert warnings into errors and some other optimisations
 set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} -DMINSIZEREL \
@@ -53,7 +70,7 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DRELEASE \
         ${WARNING_FLAGS} \
         -O3 -Werror -fomit-frame-pointer -march=native -mtune=native \
         -funroll-loops -flto")
-
+endif ()
 
 # -----------------------------------------------------------------------------
 # Source files
@@ -132,12 +149,15 @@ add_library(ascon128a STATIC ${LIB_SRC_FILES_128a})
 add_library(ascon80pq STATIC ${LIB_SRC_FILES_80pq})
 add_library(asconhash STATIC ${LIB_SRC_FILES_HASH})
 
+if (NOT MSVC) # TODO: find out why this has link errors...
 # Shared library (.dylib / .dll)
 # Does not reuse the static library object files, as they are
 # recompiled in order to have position-independent code
 add_library(ascon SHARED ${LIB_SRC_FILES_FULL})
 set_property(TARGET ascon PROPERTY POSITION_INDEPENDENT_CODE ON)
+endif ()
 
+if (NOT MSVC) # TODO: find out why this has link errors...
 # Test runner executable, reuse the static library instead of recompiling
 # the source files
 add_executable(testascon
@@ -157,14 +177,16 @@ add_custom_command(
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
         "${CMAKE_BINARY_DIR}/vectors")
+endif ()
 
+if (NOT MSVC) # TODO: find out why this has link errors...
 # Benchmark runner executable, reuse the static library instead of recompiling
 # the source files
 add_executable(benchmark
         ${BENCHMARK_SRC_FILES})
 target_link_libraries(benchmark PUBLIC asconfull)
 target_include_directories(benchmark PUBLIC inc/)
-
+endif ()
 
 # Doxygen documentation builder
 find_package(Doxygen)

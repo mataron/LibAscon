@@ -6,6 +6,10 @@
  * @authors see AUTHORS.md file
  */
 
+#ifdef _MSVC
+#include <malloc.h>
+#endif
+
 #include "ascon.h"
 #include "ascon_internal.h"
 
@@ -170,7 +174,11 @@ size_t ascon_aead80pq_decrypt_final(ascon_aead_ctx_t* const ctx,
     // If the user requests tag_len==0, than expected_tag[0] is problematic
     // for some compilers. Thus we replace it with a 1 just in this case
     const uint8_t local_len = tag_len > 0 ? tag_len : 1;
+#ifdef _MSVC
+    uint8_t* expected_tag = _malloca(local_len);
+#else
     uint8_t expected_tag[local_len];
+#endif
     ascon_aead_generate_tag(ctx, expected_tag, tag_len);
     const int tags_differ = memcmp(tag, expected_tag, tag_len);
     if (tags_differ)
@@ -184,5 +192,8 @@ size_t ascon_aead80pq_decrypt_final(ascon_aead_ctx_t* const ctx,
     // Final security cleanup of the internal state, key and buffer.
     memset(expected_tag, 0, tag_len);
     ascon_aead_cleanup(ctx);
+#ifdef _MSVC
+    _freea(expected_tag);
+#endif
     return freshly_generated_plaintext_len;
 }
