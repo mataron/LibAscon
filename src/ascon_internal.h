@@ -21,7 +21,7 @@ extern "C"
 #include <stdint.h>
 #include "ascon.h"
 
-#if DEBUG || MINSIZEREL
+#if DEBUG || MINSIZEREL || _MSVC
     #define ASCON_INLINE
 #else
     #define ASCON_INLINE inline

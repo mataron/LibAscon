@@ -149,15 +149,12 @@ add_library(ascon128a STATIC ${LIB_SRC_FILES_128a})
 add_library(ascon80pq STATIC ${LIB_SRC_FILES_80pq})
 add_library(asconhash STATIC ${LIB_SRC_FILES_HASH})
 
-if (NOT MSVC) # TODO: find out why this has link errors...
 # Shared library (.dylib / .dll)
 # Does not reuse the static library object files, as they are
 # recompiled in order to have position-independent code
 add_library(ascon SHARED ${LIB_SRC_FILES_FULL})
 set_property(TARGET ascon PROPERTY POSITION_INDEPENDENT_CODE ON)
-endif ()
 
-if (NOT MSVC) # TODO: find out why this has link errors...
 # Test runner executable, reuse the static library instead of recompiling
 # the source files
 add_executable(testascon
@@ -177,16 +174,15 @@ add_custom_command(
 set_property(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
         "${CMAKE_BINARY_DIR}/vectors")
-endif ()
 
-if (NOT MSVC) # TODO: find out why this has link errors...
+#if (NOT MSVC) # TODO: find out why this has link errors...
 # Benchmark runner executable, reuse the static library instead of recompiling
 # the source files
 add_executable(benchmark
         ${BENCHMARK_SRC_FILES})
 target_link_libraries(benchmark PUBLIC asconfull)
 target_include_directories(benchmark PUBLIC inc/)
-endif ()
+#endif ()
 
 # Doxygen documentation builder
 find_package(Doxygen)

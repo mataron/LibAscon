@@ -77,8 +77,10 @@ inline void ascon_hash_update(ascon_hash_ctx_t* const ctx,
                           ASCON_RATE);
 }
 
-
-inline void ascon_hash_xof_update(ascon_hash_ctx_t* const ctx,
+#ifndef _MSVC
+inline
+#endif
+void ascon_hash_xof_update(ascon_hash_ctx_t* const ctx,
                                   const uint8_t* data,
                                   size_t data_len)
 {
